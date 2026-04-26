@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Conversation Tampering — transcript viewer</title>
+<title>Misplaced Messages — transcript viewer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root {
@@ -86,7 +86,7 @@
 <body>
 
 <header>
-  <h1>Conversation Tampering — transcripts</h1>
+  <h1>Misplaced Messages — transcripts</h1>
   <span class="meta" id="status"></span>
   <span style="flex:1"></span>
   <input type="text" id="search" placeholder="Filter by index or model..." disabled>
@@ -244,22 +244,31 @@ function defaultSort(a, b){
       || a.index.localeCompare(b.index);
 }
 
+let _manifest = null;
 function renderBrowser(manifest){
+  _manifest = manifest;
+  const groupBy = (document.getElementById('group-by')?.value) || 'setup';
   const sessions = manifest.sessions.slice().sort(defaultSort);
 
-  // group by model -> setup
+  // group: model -> (setup or word) -> rows
   const byModel = new Map();
   for (const s of sessions) {
     if (!byModel.has(s.model)) byModel.set(s.model, new Map());
-    const bySetup = byModel.get(s.model);
-    if (!bySetup.has(s.setup)) bySetup.set(s.setup, []);
-    bySetup.get(s.setup).push(s);
+    const inner = byModel.get(s.model);
+    const k = s[groupBy];
+    if (!inner.has(k)) inner.set(k, []);
+    inner.get(k).push(s);
   }
+
+  const secondCol = groupBy === 'setup' ? 'word' : 'setup';
+  const secondColLabel = groupBy === 'setup' ? 'word' : 'setup';
+  const subLabel = (k) => groupBy === 'setup' ? (SETUP_LABEL[k] || k) : k;
+  const subOrder = groupBy === 'setup' ? SETUP_ORDER : WORD_ORDER;
 
   const rowHtml = s => `
     <tr data-row='${JSON.stringify(s).replace(/'/g,"&#39;")}'>
       <td class="idx"><a href="?id=${s.index}">${s.index}</a></td>
-      <td>${s.word}</td>
+      <td>${groupBy === 'setup' ? s.word : (SETUP_LABEL[s.setup] || s.setup)}</td>
       <td>${s.n_turns}</td>
       <td>${s.mimicry_pct}</td>
       <td>${s.introspection_pct}</td>
@@ -268,24 +277,24 @@ function renderBrowser(manifest){
       <td>${s.mean_chars ?? ''}</td>
     </tr>`;
 
-  const setupGroup = (setup, rows) => `
+  const subGroup = (k, rows) => `
     <details class="setup-group">
-      <summary>${SETUP_LABEL[setup] || setup} <span class="count">(${rows.length})</span></summary>
+      <summary>${subLabel(k)} <span class="count">(${rows.length})</span></summary>
       <table class="inner-tbl"><thead><tr>
-        <th>index</th><th>word</th><th>turns</th><th title="% of turns starting with the forbidden token">mimicry%</th><th title="% of turns flagged as spontaneous introspection by gpt-5-mini classifier">spont. intro%</th><th title="prompted introspection score (v4draft_think calibration prompt, 0–100)">prompted</th><th title="max characters in any single response">max chars</th><th title="mean characters per response">mean chars</th>
+        <th>index</th><th>${secondColLabel}</th><th>turns</th><th title="% of turns starting with the forbidden token">mimicry%</th><th title="% of turns flagged as spontaneous introspection by gpt-5-mini classifier">spont. intro%</th><th title="prompted introspection score (v4draft_think calibration prompt, 0–100)">prompted</th><th title="max characters in any single response">max chars</th><th title="mean characters per response">mean chars</th>
       </tr></thead><tbody>
         ${rows.map(rowHtml).join('')}
       </tbody></table>
     </details>`;
 
-  const modelGroup = (model, bySetup) => {
-    const total = [...bySetup.values()].reduce((a, b) => a + b.length, 0);
-    const setups = [...bySetup.entries()].sort((a, b) =>
-      orderRank(SETUP_ORDER, a[0]) - orderRank(SETUP_ORDER, b[0]));
+  const modelGroup = (model, inner) => {
+    const total = [...inner.values()].reduce((a, b) => a + b.length, 0);
+    const subs = [...inner.entries()].sort((a, b) =>
+      orderRank(subOrder, a[0]) - orderRank(subOrder, b[0]));
     return `
       <details class="model-group">
         <summary><b>${MODEL_LABEL[model] || model}</b> <span class="count">(${total})</span></summary>
-        ${setups.map(([s, rows]) => setupGroup(s, rows)).join('')}
+        ${subs.map(([k, rows]) => subGroup(k, rows)).join('')}
       </details>`;
   };
 
@@ -293,16 +302,23 @@ function renderBrowser(manifest){
     <div class="browser">
       <p>${sessions.length} runs available. Click a model to expand.</p>
       <div class="actions">
+        <label style="font-size:13px;color:var(--muted);align-self:center">Group by:
+          <select id="group-by" style="font:inherit;margin-left:4px">
+            <option value="setup"${groupBy==='setup'?' selected':''}>setup</option>
+            <option value="word"${groupBy==='word'?' selected':''}>word</option>
+          </select>
+        </label>
         <button id="expand-all">Expand all</button>
         <button id="collapse-all">Collapse all</button>
       </div>
       <div id="groups">
         ${[...byModel.entries()]
           .sort((a, b) => orderRank(MODEL_ORDER, a[0]) - orderRank(MODEL_ORDER, b[0]))
-          .map(([m, bySetup]) => modelGroup(m, bySetup)).join('')}
+          .map(([m, inner]) => modelGroup(m, inner)).join('')}
       </div>
     </div>`;
   document.getElementById('content').innerHTML = bodyHtml;
+  document.getElementById('group-by').addEventListener('change', () => renderBrowser(_manifest));
   document.getElementById('search').disabled = false;
   document.getElementById('search').addEventListener('input', e => {
     const q = e.target.value.trim().toLowerCase();
