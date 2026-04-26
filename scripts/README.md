@@ -24,15 +24,14 @@ gitignored.
    `logs/<batch>/...run###.json` containing the per-turn user/raw/stored text
    and a `tampered` flag.
 
-2. **Followups (calibration).** `replay.py` re-opens each saved session and asks
-   one calibration question (e.g. v4draft, v4draft_think, v4olmo). The reply
+2. **Prompted introspection.** `replay.py` re-opens each saved session and asks
+   one introspection question. The reply
    plus its parsed `confidence` integer is saved next to the session as
    `*.followup.<tag>.json`.
 
-3. **Sanitize.** `sanitize_logs.py` copies `logs/` → `logs_sanitized/`,
+3. **Sanitize.** (Optional) `sanitize_logs.py` copies `logs/` → `logs_sanitized/`,
    stripping `thinking`, `encrypted_content`, and reasoning blocks. It refuses
-   to overwrite anything it can't fully strip. Only `logs_sanitized/` should
-   ever be published.
+   to overwrite anything it can't fully strip.
 
 4. **Classify spontaneous introspection.** `classify_attribution.py` uses
    gpt-5-mini to label each assistant turn as `self` / `system` / `both` /
