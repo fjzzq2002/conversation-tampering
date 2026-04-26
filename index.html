@@ -179,14 +179,20 @@ function renderRun(run, jumpTurn){
     if (t.tampered) badges.push('<span class="badge tamp">tamper</span>');
     if (t.mimic_start) badges.push('<span class="badge mimic">mimic</span>');
     if (t.attribution && t.attribution !== 'none') badges.push(`<span class="badge ${t.attribution}">introspection-${t.attribution}</span>`);
-    const tampered = t.tampered && t.stored !== t.raw;
-    const injectKind = m.setup === 'prefill' ? 'prefilled'
-                     : (m.setup === 'append' || m.setup === 'insert' || m.setup === 'nothinking' || m.setup === 'thinking+carry' || m.setup === 'thinking') ? 'prepended'
-                     : null;
-    const asstLabel = tampered && injectKind
+    // prefill is always a tampering by construction: chatter prepends the
+    // inject token to the assistant message and the model continues from it.
+    // gaslight.py records tampered=False whenever the prefilled prefix matches
+    // the forbidden word — patch around that here for display.
+    const isPrefill = m.setup === 'prefill';
+    const isPrepend = (m.setup === 'append' || m.setup === 'insert'
+                    || m.setup === 'nothinking' || m.setup === 'thinking+carry'
+                    || m.setup === 'thinking');
+    const displayTampered = isPrefill || (isPrepend && t.tampered && t.stored !== t.raw);
+    const injectKind = isPrefill ? 'prefilled' : (isPrepend ? 'prepended' : null);
+    const asstLabel = displayTampered && injectKind
       ? `assistant (${injectKind} token in <span style="color:var(--inject);font-weight:700">orange</span>)`
       : 'assistant';
-    const asstBody = tampered
+    const asstBody = displayTampered
       ? highlightInjected(t.stored, m.inject_token)
       : escapeHtml(t.raw);
     return `
