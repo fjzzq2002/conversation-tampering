@@ -1,0 +1,23 @@
+# Secrets — never commit API keys
+.env
+*.local
+
+# Raw and sanitized session traces — only built `data/` JSONs are released.
+# logs/ contains `thinking` traces that must not be published.
+logs/
+logs_sanitized/
+embeddings/
+
+# Backups
+backups/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Editor / OS junk
+.DS_Store
+.idea/
+.vscode/
+*.swp
