@@ -321,7 +321,7 @@ function renderBrowser(manifest){
   document.getElementById('group-by').addEventListener('change', () => renderBrowser(_manifest));
   const searchEl = document.getElementById('search');
   searchEl.disabled = false;
-  searchEl.placeholder = 'Filter, or paste an index like op45-pf-l-06-t30 + Enter';
+  searchEl.placeholder = 'op45-pf-l-06-t30 + Enter to jump';
   searchEl.addEventListener('input', e => {
     const q = e.target.value.trim().toLowerCase();
     if (!q) {
