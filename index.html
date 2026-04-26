@@ -323,7 +323,8 @@ function renderBrowser(manifest){
   searchEl.disabled = false;
   searchEl.placeholder = 'op45-pf-l-06-t30 + Enter to jump';
   searchEl.addEventListener('input', e => {
-    const q = e.target.value.trim().toLowerCase();
+    // strip trailing '-tNN' so pasting a full turn permalink still matches the run row
+    const q = e.target.value.trim().toLowerCase().replace(/-t\d+$/, '');
     if (!q) {
       document.querySelectorAll('.browser tbody tr, .browser .setup-group, .browser .model-group')
         .forEach(el => el.style.display = '');
