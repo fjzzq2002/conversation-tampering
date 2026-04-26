@@ -34,5 +34,5 @@ generates `data/` hard-fails if it ever encounters a `thinking` or
 
 ## Citation
 
-If you use this dataset or the experiment design, please cite the accompanying
-LessWrong post (link TBD).
+If you use this dataset or the experiment design, please cite the [accompanying
+LessWrong post](https://www.lesswrong.com/posts/yAR6uMdSaBjkbJ4u9/spontaneous-introspection-in-conversation-tampering).
