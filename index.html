@@ -180,11 +180,11 @@ function renderRun(run, jumpTurn){
     if (t.mimic_start) badges.push('<span class="badge mimic">mimic</span>');
     if (t.attribution && t.attribution !== 'none') badges.push(`<span class="badge ${t.attribution}">introspection-${t.attribution}</span>`);
     const tampered = t.tampered && t.stored !== t.raw;
-    const injectMoment = m.setup === 'prefill' ? 'before generation'
-                       : (m.setup === 'append' || m.setup === 'insert' || m.setup === 'nothinking' || m.setup === 'thinking+carry' || m.setup === 'thinking') ? 'after generation'
-                       : null;
-    const asstLabel = tampered && injectMoment
-      ? `assistant (injected token ${injectMoment} in <span style="color:var(--inject);font-weight:700">orange</span>)`
+    const injectKind = m.setup === 'prefill' ? 'prefilled'
+                     : (m.setup === 'append' || m.setup === 'insert' || m.setup === 'nothinking' || m.setup === 'thinking+carry' || m.setup === 'thinking') ? 'prepended'
+                     : null;
+    const asstLabel = tampered && injectKind
+      ? `assistant (${injectKind} token in <span style="color:var(--inject);font-weight:700">orange</span>)`
       : 'assistant';
     const asstBody = tampered
       ? highlightInjected(t.stored, m.inject_token)
