@@ -346,13 +346,19 @@ function renderBrowser(manifest){
   });
   searchEl.addEventListener('keydown', e => {
     if (e.key !== 'Enter') return;
-    const raw = searchEl.value.trim();
+    const raw = searchEl.value.trim().toLowerCase();
     if (!raw) return;
-    // accept either <run-index> or <run-index>-tNN
-    const idxMatch = raw.match(/^([a-z0-9]+(?:-[a-z0-9]+){3,})(?:-t(\d+))?$/i);
-    if (!idxMatch) return;  // not a parseable index, leave filter behaviour as is
-    const baseIdx = idxMatch[1];
-    const turn = idxMatch[2];
+    // canonical indexes have 4 dash segments: model-setup-word-run, optionally + -tNN
+    const parts = raw.split('-');
+    let baseIdx, turn = null;
+    if (parts.length === 4) {
+      baseIdx = raw;
+    } else if (parts.length === 5 && /^t\d+$/.test(parts[4])) {
+      baseIdx = parts.slice(0, 4).join('-');
+      turn = parts[4].slice(1);
+    } else {
+      return;
+    }
     const known = new Set(_manifest.sessions.map(s => s.index));
     if (!known.has(baseIdx)) return;
     const target = turn ? `${baseIdx}-t${turn.padStart(2, '0')}` : baseIdx;
