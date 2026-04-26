@@ -319,8 +319,10 @@ function renderBrowser(manifest){
     </div>`;
   document.getElementById('content').innerHTML = bodyHtml;
   document.getElementById('group-by').addEventListener('change', () => renderBrowser(_manifest));
-  document.getElementById('search').disabled = false;
-  document.getElementById('search').addEventListener('input', e => {
+  const searchEl = document.getElementById('search');
+  searchEl.disabled = false;
+  searchEl.placeholder = 'Filter, or paste an index like op45-pf-l-06-t30 + Enter';
+  searchEl.addEventListener('input', e => {
     const q = e.target.value.trim().toLowerCase();
     if (!q) {
       document.querySelectorAll('.browser tbody tr, .browser .setup-group, .browser .model-group')
@@ -341,6 +343,20 @@ function renderBrowser(manifest){
       d.style.display = any ? '' : 'none';
       if (any) d.open = true;
     });
+  });
+  searchEl.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const raw = searchEl.value.trim();
+    if (!raw) return;
+    // accept either <run-index> or <run-index>-tNN
+    const idxMatch = raw.match(/^([a-z0-9]+(?:-[a-z0-9]+){3,})(?:-t(\d+))?$/i);
+    if (!idxMatch) return;  // not a parseable index, leave filter behaviour as is
+    const baseIdx = idxMatch[1];
+    const turn = idxMatch[2];
+    const known = new Set(_manifest.sessions.map(s => s.index));
+    if (!known.has(baseIdx)) return;
+    const target = turn ? `${baseIdx}-t${turn.padStart(2, '0')}` : baseIdx;
+    window.location.search = `?id=${target}`;
   });
   document.getElementById('expand-all').onclick = () =>
     document.querySelectorAll('.browser details').forEach(d => d.open = true);
