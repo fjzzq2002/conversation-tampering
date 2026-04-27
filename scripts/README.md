@@ -87,7 +87,15 @@ pip install torch transformers numpy matplotlib
 | File | Purpose |
 | --- | --- |
 | `mech_interp/concept_grid.py` | 35 × 35 grid: every concept paired as both prefill and steering, cos similarity of residual-stream diffs aggregated across positions × layers |
+| `mech_interp/analyze_concept_grid.py` | three permutation tests on a saved grid (mean diag, diag − row mean, diag − col mean) |
 | `mech_interp/plot_concept_grid.py` | render the 35 × 35 grid as a sorted heatmap |
 
-The saved 35 × 35 grid and its heatmap are at
-`figures/concept_grid_s05.json` and `figures/concept_grid_heatmap.png`.
+The saved 35 × 35 grids and their heatmaps live in `figures/`:
+- `concept_grid_s05.json` / `concept_grid_heatmap.png` — strength 0.05 (linear regime)
+- `concept_grid_s50.json` / `concept_grid_heatmap_s50.png` — strength 0.5 (10× larger; result holds)
+
+Run the analysis:
+```bash
+python mech_interp/analyze_concept_grid.py figures/concept_grid_s05.json
+python mech_interp/analyze_concept_grid.py figures/concept_grid_s50.json
+```
