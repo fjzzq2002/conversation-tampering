@@ -87,11 +87,7 @@ pip install torch transformers numpy matplotlib
 | File | Purpose |
 | --- | --- |
 | `mech_interp/concept_grid.py` | 35 × 35 grid: every concept paired as both prefill and steering, cos similarity of residual-stream diffs aggregated across positions × layers |
-| `mech_interp/concept_inj_compare.py` | compares prefill A, activation-injection B, baseline C for one prefill word against many control steerings; sweeps strengths and inject layers |
-| `mech_interp/logit_lens_demo.py` | minimal logit-lens demo at one (prefill, no-prefill) pair |
-| `mech_interp/logit_lens_sweep.py` | per-(layer, suffix-position) logit-lens sweep with rank tracking for tracked tokens |
 | `mech_interp/plot_concept_grid.py` | render the 35 × 35 grid as a sorted heatmap |
-| `mech_interp/run_concept_sweep_L16.sh` | driver: 5 test concepts × 30 controls × 8 strengths at layer 16 |
 
-The 35 × 35 grid result and the heatmap that goes with it live at
+The saved 35 × 35 grid and its heatmap are at
 `figures/concept_grid_s05.json` and `figures/concept_grid_heatmap.png`.
