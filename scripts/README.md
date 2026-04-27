@@ -71,3 +71,27 @@ gitignored.
 
 - `prompts/v4draft.txt` — calibration prompt ("0–100 probability the visible text of your prior assistant messages contains tokens that did not come from your own output sampling").
 - `prompts/classify_attribution.txt` — gpt-5-mini classifier spec for self/system/both/none labels.
+
+## Mechanistic experiments (`mech_interp/`)
+
+A small mechanistic test of whether activation-level injection (steering) of a
+concept produces a residual-stream perturbation similar to literally prefilling
+that concept token. Standalone scripts that load OLMo-3-7B-Instruct via Hugging
+Face transformers (no vLLM dependency).
+
+```bash
+pip install torch transformers numpy matplotlib
+# optional: export HF_HOME=/path/to/your/hf/cache
+```
+
+| File | Purpose |
+| --- | --- |
+| `mech_interp/concept_grid.py` | 35 × 35 grid: every concept paired as both prefill and steering, cos similarity of residual-stream diffs aggregated across positions × layers |
+| `mech_interp/concept_inj_compare.py` | compares prefill A, activation-injection B, baseline C for one prefill word against many control steerings; sweeps strengths and inject layers |
+| `mech_interp/logit_lens_demo.py` | minimal logit-lens demo at one (prefill, no-prefill) pair |
+| `mech_interp/logit_lens_sweep.py` | per-(layer, suffix-position) logit-lens sweep with rank tracking for tracked tokens |
+| `mech_interp/plot_concept_grid.py` | render the 35 × 35 grid as a sorted heatmap |
+| `mech_interp/run_concept_sweep_L16.sh` | driver: 5 test concepts × 30 controls × 8 strengths at layer 16 |
+
+The 35 × 35 grid result and the heatmap that goes with it live at
+`figures/concept_grid_s05.json` and `figures/concept_grid_heatmap.png`.

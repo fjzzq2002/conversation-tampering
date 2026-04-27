@@ -21,11 +21,19 @@ or `?id=<...>-tNN` to jump to a specific turn.
 
 ```
 .
-├── index.html          # transcript viewer (single-page app)
-├── data/               # 740 sanitized session JSONs + manifest.json
-├── scripts/            # experiment + analysis pipeline (see scripts/README.md)
+├── index.html              # transcript viewer (single-page app)
+├── data/                   # 740 sanitized session JSONs + manifest.json
+├── figures/                # heatmaps + raw outputs from the mechanistic experiments
+├── scripts/                # experiment + analysis pipeline (see scripts/README.md)
+│   └── mech_interp/        # activation-injection vs prefill comparison
 └── .gitignore
 ```
+
+The `scripts/mech_interp/` subfolder contains a small mechanistic study:
+does activation-level injection (concept-vector steering, à la Macar et al.)
+of a concept produce a residual-stream perturbation similar to literally
+prefilling that concept's token? See `scripts/README.md` and the heatmap at
+`figures/concept_grid_heatmap.png`.
 
 The `data/` directory is **derived** from sanitized logs (no thinking traces or
 encrypted reasoning blobs). The `scripts/build_viewer_data.py` script that
